@@ -1,0 +1,9 @@
+Insurance Policy Certificate
+
+Policy Number: POL-2024-0001
+Vessel Name: Sea Breeze
+Policy Start Date: 2024-01-01
+Policy End Date: 2024-12-31
+Insured Value: 1,250,000
+
+This policy certifies coverage for the vessel listed above.
