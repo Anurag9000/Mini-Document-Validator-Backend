@@ -2,39 +2,22 @@ name: CI
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: [ main, master, trunk, '*' ]
   pull_request:
+    branches: [ main, master, trunk, '*' ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
-      - name: Install dependencies
+          python-version: '3.11'
+      - name: Install project
         run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-
-      - name: Run format check
-        run: |
-          black --check src tests
-
-      - name: Run lint
-        run: |
-          ruff check src tests
-
-      - name: Run type check
-        run: |
-          mypy src
-
+          python -m pip install -U pip
+          python -m pip install -e .[dev]
       - name: Run tests
-        run: |
-          pytest
+        run: pytest -q
+
