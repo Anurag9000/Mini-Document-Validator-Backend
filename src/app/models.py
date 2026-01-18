@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 class ValidationRequest(BaseModel):
     """Request body for validation endpoint."""
 
-    text: str = Field(..., min_length=1, description="Raw insurance document text")
+    text: str = Field(..., min_length=1, max_length=100_000, description="Raw insurance document text")
 
 
 class ExtractedFields(BaseModel):
@@ -51,7 +51,7 @@ class ExtractedFields(BaseModel):
         if isinstance(value, (int, float)):
             return float(value)
         # Remove currency symbols and other non-numeric chars (except . and -)
-        clean_value = "".join(c for c in value if c.isdigit() or c == ".")
+        clean_value = "".join(c for c in value if c.isdigit() or c in ".-")
         try:
             return float(clean_value)
         except ValueError:

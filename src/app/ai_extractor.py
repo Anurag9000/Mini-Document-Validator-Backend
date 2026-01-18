@@ -40,7 +40,7 @@ class RuleBasedAIExtractor:
         re.IGNORECASE,
     )
     _insured_value_pattern = re.compile(
-        r"insured\s*value[:\-]?\s*(?P<currency>[$€£])?\s*(?P<value>[0-9,]+(?:\.\d{2})?)",
+        r"insured\s*value[:\-]?\s*(?P<currency>[$€£])?\s*(?P<value>\-?[0-9,]+(?:\.\d{2})?)",
         re.IGNORECASE,
     )
 
