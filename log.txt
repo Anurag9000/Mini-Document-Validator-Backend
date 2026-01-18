@@ -1,0 +1,12 @@
+DEBUG: Loading vessels from D:\Finished Projects\Resume\Document_validator_backend\src\app\data\valid_vessels.json
+DEBUG: Opening D:\Finished Projects\Resume\Document_validator_backend\src\app\data\valid_vessels.json
+DEBUG: JSON loaded. Type: <class 'list'>. Len: 15
+DEBUG: Returning set size 15
+DEBUG: Denied 'Sea Breeze
+Policy Start Date'. Registry size: 15. Sample: ['STORMBREAKER', "MARINER'S HOPE", 'OCEANIC STAR']
+DEBUGGING: Vessel='Sea Breeze
+Policy Start Date' Allowed=False
+DEBUG: Denied 'Sea Breeze
+Policy Start Date'. Registry size: 15. Sample: ['STORMBREAKER', "MARINER'S HOPE", 'OCEANIC STAR']
+Valid: False
+Errors: ['vessel_name is not in the list of allowed vessels']

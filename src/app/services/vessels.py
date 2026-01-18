@@ -28,7 +28,8 @@ class VesselRegistry:
 
 
 def _default_data_path() -> Path:
-    return Path(__file__).resolve().parents[3] / "data" / "valid_vessels.json"
+    # src/app/services/vessels.py -> src/app/data/valid_vessels.json
+    return Path(__file__).resolve().parent.parent / "data" / "valid_vessels.json"
 
 
 def _load_vessel_names(path: Path) -> set[str]:

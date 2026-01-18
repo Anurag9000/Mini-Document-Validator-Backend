@@ -20,12 +20,7 @@ def validate_insured_value(value: Optional[float]) -> bool:
     return value is not None and value > 0
 
 
-def validate_vessel_name(vessel_name: Optional[str], valid_vessels: set[str]) -> bool:
-    """Return ``True`` if the vessel name is in the allowed list."""
 
-    if vessel_name is None:
-        return False
-    return vessel_name.upper().strip() in valid_vessels
 
 
 def validate_policy_number(policy_number: Optional[str]) -> bool:
@@ -39,6 +34,5 @@ def validate_policy_number(policy_number: Optional[str]) -> bool:
 __all__ = [
     "validate_date_order",
     "validate_insured_value",
-    "validate_vessel_name",
     "validate_policy_number",
 ]

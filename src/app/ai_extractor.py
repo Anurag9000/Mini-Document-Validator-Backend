@@ -29,7 +29,7 @@ class RuleBasedAIExtractor:
         r"policy\s*number[:\-]?\s*(?P<value>[\w\-\./]+)", re.IGNORECASE
     )
     _vessel_name_pattern = re.compile(
-        r"vessel\s*name[:\-]?\s*(?P<value>[\w\s\.\-']+)", re.IGNORECASE
+        r"vessel\s*name[:\-]?\s*(?P<value>[\w \t\.\-']+)", re.IGNORECASE
     )
     _start_date_pattern = re.compile(
         r"policy\s*start\s*date[:\-]?\s*(?P<value>\d{4}-\d{2}-\d{2})",

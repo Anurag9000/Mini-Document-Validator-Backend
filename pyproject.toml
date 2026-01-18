@@ -69,5 +69,6 @@ include = [
   "README.md",
   "LICENSE.txt",
   "pyproject.toml",
-  "data/**",
+  "pyproject.toml",
+  "src/app/data/**",
 ]

@@ -1,0 +1,11 @@
+DEBUG: Loading vessels from D:\Finished Projects\Resume\Document_validator_backend\src\app\data\valid_vessels.json
+Count: 15
+Allowed('Sea Breeze'): True
+DEBUG: Denied 'Sea Breeze
+Policy Start Date'. Registry size: 15. Sample: ['WESTERN TIDE', 'HARBOR LIGHT', 'PACIFIC CREST']
+DEBUGGING: Vessel='Sea Breeze
+Policy Start Date' Allowed=False
+DEBUG: Denied 'Sea Breeze
+Policy Start Date'. Registry size: 15. Sample: ['WESTERN TIDE', 'HARBOR LIGHT', 'PACIFIC CREST']
+Valid: False
+Errors: ['vessel_name is not in the list of allowed vessels']

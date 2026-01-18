@@ -16,7 +16,6 @@ from ..validation import (
     validate_date_order,
     validate_insured_value,
     validate_policy_number,
-    validate_vessel_name,
 )
 
 router = APIRouter(tags=["validation"])
@@ -45,7 +44,7 @@ async def validate_document(
             extracted.policy_start_date, extracted.policy_end_date
         ),
         insured_value_ok=validate_insured_value(extracted.insured_value),
-        vessel_allowed=validate_vessel_name(extracted.vessel_name, vessels.all()),
+        vessel_allowed=vessels.is_allowed(extracted.vessel_name),
         policy_number_ok=validate_policy_number(extracted.policy_number),
     )
 
