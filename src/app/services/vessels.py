@@ -12,14 +12,14 @@ class VesselRegistry:
     """Stores the set of valid vessel names."""
 
     def __init__(self, vessels: Iterable[str]):
-        self._vessels: set[str] = {v.strip() for v in vessels if v.strip()}
+        self._vessels: set[str] = {v.upper().strip() for v in vessels if v.strip()}
 
     def is_allowed(self, name: str | None) -> bool:
         """Return ``True`` when the vessel name is registered."""
 
         if name is None:
             return False
-        return name.strip() in self._vessels
+        return name.upper().strip() in self._vessels
 
     def all(self) -> set[str]:
         """Return a copy of the known vessel names."""

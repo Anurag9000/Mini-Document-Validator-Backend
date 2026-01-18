@@ -38,7 +38,10 @@ class ExtractedFields(BaseModel):
             return None
         if isinstance(value, date):
             return value
-        return date.fromisoformat(value)
+        try:
+            return date.fromisoformat(value)
+        except ValueError:
+            return None
 
     @field_validator("insured_value", mode="before")
     @classmethod
@@ -47,7 +50,12 @@ class ExtractedFields(BaseModel):
             return None
         if isinstance(value, (int, float)):
             return float(value)
-        return float(value.replace(",", "").strip())
+        # Remove currency symbols and other non-numeric chars (except . and -)
+        clean_value = "".join(c for c in value if c.isdigit() or c == ".")
+        try:
+            return float(clean_value)
+        except ValueError:
+            return None
 
 
 class ValidationChecks(BaseModel):

@@ -50,8 +50,18 @@ async def validate_document(
     )
 
     errors: list[str] = []
-    if not checks.date_order_ok:
+    if extracted.policy_start_date is None:
+        errors.append("policy_start_date is missing or invalid")
+    if extracted.policy_end_date is None:
+        errors.append("policy_end_date is missing or invalid")
+
+    if (
+        extracted.policy_start_date is not None
+        and extracted.policy_end_date is not None
+        and not checks.date_order_ok
+    ):
         errors.append("policy_end_date must be after policy_start_date")
+
     if not checks.insured_value_ok:
         errors.append("insured_value must be greater than zero")
     if not checks.vessel_allowed:

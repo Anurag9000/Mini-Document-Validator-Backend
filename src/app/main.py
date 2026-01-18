@@ -5,6 +5,7 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 
 from .ai_extractor import AIExtractor, get_default_extractor
 from .config import Settings, get_settings
@@ -14,7 +15,7 @@ from .services.vessels import VesselRegistry, get_vessel_registry
 
 
 @asynccontextmanager
-def lifespan(_: FastAPI):
+async def lifespan(_: FastAPI):
     """Warm up caches on startup."""
 
     get_vessel_registry()
@@ -51,14 +52,13 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    app.dependency_overrides[validate_routes.get_extractor_dependency] = get_extractor
-    app.dependency_overrides[validate_routes.get_vessel_registry_dependency] = (
-        get_vessel_registry_dependency
-    )
-    app.dependency_overrides[meta_routes.get_settings_dependency] = get_app_settings
-
     app.include_router(meta_routes.router)
     app.include_router(validate_routes.router)
+
+    @app.get("/", include_in_schema=False)
+    async def root() -> RedirectResponse:
+        """Redirect the root path to the interactive docs."""
+        return RedirectResponse(url="/docs")
 
     return app
 

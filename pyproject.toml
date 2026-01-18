@@ -28,8 +28,7 @@ dev = [
   "mypy>=1.10.0",
   "black>=24.4.0",
   "ruff>=0.4.4",
-  "pre-commit>=3.7.0",
-  "types-requests>=2.32.0.20240523"
+  "pre-commit>=3.7.0"
 ]
 
 [project.urls]
@@ -60,3 +59,15 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-ra"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/app"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/app",
+  "README.md",
+  "LICENSE.txt",
+  "pyproject.toml",
+  "data/**",
+]

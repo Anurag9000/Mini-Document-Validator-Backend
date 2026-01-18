@@ -11,7 +11,7 @@ def validate_date_order(start: Optional[date], end: Optional[date]) -> bool:
 
     if start is None or end is None:
         return False
-    return end > start
+    return end >= start
 
 
 def validate_insured_value(value: Optional[float]) -> bool:
@@ -25,7 +25,7 @@ def validate_vessel_name(vessel_name: Optional[str], valid_vessels: set[str]) ->
 
     if vessel_name is None:
         return False
-    return vessel_name.strip() in valid_vessels
+    return vessel_name.upper().strip() in valid_vessels
 
 
 def validate_policy_number(policy_number: Optional[str]) -> bool:

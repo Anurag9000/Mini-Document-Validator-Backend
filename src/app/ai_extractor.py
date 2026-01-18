@@ -26,10 +26,10 @@ class RuleBasedAIExtractor:
     """Deterministic extractor based on regular expressions."""
 
     _policy_number_pattern = re.compile(
-        r"policy\s*number[:\-]?\s*(?P<value>[A-Z0-9\-]+)", re.IGNORECASE
+        r"policy\s*number[:\-]?\s*(?P<value>[\w\-\./]+)", re.IGNORECASE
     )
     _vessel_name_pattern = re.compile(
-        r"vessel\s*name[:\-]?\s*(?P<value>[A-Za-z0-9 ']+)", re.IGNORECASE
+        r"vessel\s*name[:\-]?\s*(?P<value>[\w\s\.\-']+)", re.IGNORECASE
     )
     _start_date_pattern = re.compile(
         r"policy\s*start\s*date[:\-]?\s*(?P<value>\d{4}-\d{2}-\d{2})",
@@ -40,7 +40,7 @@ class RuleBasedAIExtractor:
         re.IGNORECASE,
     )
     _insured_value_pattern = re.compile(
-        r"insured\s*value[:\-]?\s*(?P<value>[0-9,]+(?:\.\d{2})?)",
+        r"insured\s*value[:\-]?\s*(?P<currency>[$€£])?\s*(?P<value>[0-9,]+(?:\.\d{2})?)",
         re.IGNORECASE,
     )
 
