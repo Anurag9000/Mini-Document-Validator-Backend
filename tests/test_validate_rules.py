@@ -101,4 +101,55 @@ async def test_invalid_policy_number(client: AsyncClient):
     payload = response.json()
 
     assert payload["validations"]["policy_number_ok"] is False
-    assert "policy_number must be provided" in payload["errors"]
+    assert "policy_number is missing or empty" in payload["errors"]
+
+
+@pytest.mark.asyncio
+async def test_thousand_separator_and_currency(client: AsyncClient):
+    # Test that model_validate handles $1,234.56 correctly
+    from app.models import ExtractedFields
+    data = {
+        "policy_number": "POL-123",
+        "vessel_name": "Sea Breeze",
+        "policy_start_date": "2024-01-01",
+        "policy_end_date": "2024-12-31",
+        "insured_value": "$1,234,567.89"
+    }
+    fields = ExtractedFields.model_validate(data)
+    assert fields.insured_value == 1234567.89
+
+
+@pytest.mark.asyncio
+async def test_malformed_date(client: AsyncClient):
+    fields = ExtractedFields(
+        policy_number="POL-001",
+        vessel_name="Sea Breeze",
+        policy_start_date="not-a-date",
+        policy_end_date="2024-06-01",
+        insured_value="100000",
+    )
+    app.dependency_overrides[get_extractor_dependency] = lambda: _MockExtractor(fields)
+
+    response = await client.post("/validate", json={"text": "ignored"})
+    payload = response.json()
+
+    assert payload["validations"]["date_order_ok"] is False
+    assert "policy_start_date is missing or invalid format (YYYY-MM-DD)" in payload["errors"]
+
+
+@pytest.mark.asyncio
+async def test_vessel_name_case_insensitive(client: AsyncClient):
+    fields = ExtractedFields(
+        policy_number="POL-001",
+        vessel_name="sea breeze",  # lower case
+        policy_start_date="2024-05-01",
+        policy_end_date="2024-06-01",
+        insured_value="100000",
+    )
+    app.dependency_overrides[get_extractor_dependency] = lambda: _MockExtractor(fields)
+
+    response = await client.post("/validate", json={"text": "ignored"})
+    payload = response.json()
+
+    assert payload["validations"]["vessel_allowed"] is True
+    assert payload["is_valid"] is True

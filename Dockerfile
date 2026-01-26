@@ -24,7 +24,6 @@ WORKDIR /app
 
 COPY --from=builder /install /usr/local
 COPY src ./src
-COPY data ./data
 
 EXPOSE 8000
 

@@ -38,9 +38,14 @@ class ExtractedFields(BaseModel):
             return None
         if isinstance(value, date):
             return value
+        
+        # Strip potential surrounding whitespace or quotes
+        if isinstance(value, str):
+            value = value.strip().strip("'\"")
+            
         try:
-            return date.fromisoformat(value)
-        except ValueError:
+            return date.fromisoformat(str(value))
+        except (ValueError, TypeError):
             return None
 
     @field_validator("insured_value", mode="before")
@@ -50,11 +55,19 @@ class ExtractedFields(BaseModel):
             return None
         if isinstance(value, (int, float)):
             return float(value)
-        # Remove currency symbols and other non-numeric chars (except . and -)
-        clean_value = "".join(c for c in value if c.isdigit() or c in ".-")
+        
+        # Remove currency symbols, commas and other non-numeric chars (except . and -)
+        # We handle cases like "$1,234.56" -> "1234.56"
+        clean_value = "".join(c for c in str(value) if c.isdigit() or c in ".-")
+        
+        # Handle multiple dots if any (take the last one as separator)
+        if clean_value.count(".") > 1:
+            parts = clean_value.split(".")
+            clean_value = "".join(parts[:-1]) + "." + parts[-1]
+
         try:
             return float(clean_value)
-        except ValueError:
+        except (ValueError, TypeError):
             return None
 
 

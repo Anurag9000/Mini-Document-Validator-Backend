@@ -7,19 +7,44 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
+import logging
+import sys
+
 from .ai_extractor import AIExtractor, get_default_extractor
 from .config import Settings, get_settings
 from .routes import meta as meta_routes
 from .routes import validate as validate_routes
 from .services.vessels import VesselRegistry, get_vessel_registry
 
+logger = logging.getLogger(__name__)
+
+
+def setup_logging(settings: Settings) -> None:
+    """Configure structured logging for the application."""
+
+    logging.basicConfig(
+        level=settings.log_level,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        stream=sys.stdout,
+    )
+    logger.info("Logging initialized with level: %s", settings.log_level)
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    """Warm up caches on startup."""
-
-    get_vessel_registry()
+    """Warm up caches and handle startup/shutdown."""
+    settings = get_settings()
+    setup_logging(settings)
+    
+    logger.info("Starting up Genoshi Backend Validator v%s", settings.version)
+    try:
+        get_vessel_registry()
+        logger.info("Vessel registry warmed up")
+    except Exception as e:
+        logger.error("Failed to warm up vessel registry: %s", e)
+    
     yield
+    logger.info("Shutting down Genoshi Backend Validator")
 
 
 def get_extractor() -> AIExtractor:

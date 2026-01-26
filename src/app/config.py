@@ -18,6 +18,7 @@ class Settings(BaseSettings):
 
     env: Literal["dev", "test", "prod"] = "dev"
     version: str = "0.1.0"
+    log_level: str = "INFO"
 
 
 @lru_cache(maxsize=1)
