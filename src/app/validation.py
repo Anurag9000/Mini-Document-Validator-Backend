@@ -7,7 +7,14 @@ from typing import Optional
 
 
 def validate_date_order(start: Optional[date], end: Optional[date]) -> bool:
-    """Return ``True`` if the end date is after or equal to the start date."""
+    """Return ``True`` if the end date is after or equal to the start date.
+    
+    Examples:
+        >>> validate_date_order(date(2023, 1, 1), date(2023, 1, 2))
+        True
+        >>> validate_date_order(date(2023, 1, 2), date(2023, 1, 1))
+        False
+    """
 
     if start is None or end is None:
         return False

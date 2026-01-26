@@ -30,6 +30,15 @@ class VesselRegistry:
 
         return set(self._vessels)
 
+    def __len__(self) -> int:
+        """Return the number of registered vessels."""
+        return len(self._vessels)
+
+    @property
+    def is_empty(self) -> bool:
+        """Return ``True`` if the registry contains no vessels."""
+        return len(self._vessels) == 0
+
 
 def _default_data_path() -> Path:
     # src/app/services/vessels.py -> src/app/data/valid_vessels.json

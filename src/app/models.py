@@ -17,13 +17,21 @@ class ValidationRequest(BaseModel):
 class ExtractedFields(BaseModel):
     """Fields extracted from the document."""
 
-    policy_number: Optional[str] = Field(default=None, description="Policy identifier")
-    vessel_name: Optional[str] = Field(default=None, description="Name of the vessel")
+    policy_number: Optional[str] = Field(
+        default=None, 
+        description="The unique identifier for the insurance policy (e.g., 'AXA-123')."
+    )
+    vessel_name: Optional[str] = Field(
+        default=None, 
+        description="The name of the vessel covered by the policy."
+    )
     policy_start_date: Optional[date] = Field(
-        default=None, description="Policy start date in ISO format"
+        default=None, 
+        description="The date when the policy coverage becomes effective (ISO 8601 format)."
     )
     policy_end_date: Optional[date] = Field(
-        default=None, description="Policy end date in ISO format"
+        default=None, 
+        description="The date when the policy coverage expires (ISO 8601 format)."
     )
     insured_value: Optional[float] = Field(
         default=None, description="Insured value in monetary units"

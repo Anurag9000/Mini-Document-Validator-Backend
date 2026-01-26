@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 
 from ..config import Settings, get_settings
+from ..services.vessels import VesselRegistry, get_vessel_registry
 
 router = APIRouter(tags=["meta"])
 
@@ -13,11 +14,18 @@ def get_settings_dependency() -> Settings:
     return get_settings()
 
 
-@router.get("/health")
-async def health() -> dict[str, str]:
-    """Return application health status."""
 
-    return {"status": "ok"}
+
+@router.get("/health")
+async def health(
+    vessels: VesselRegistry = Depends(get_vessel_registry)
+) -> dict[str, str]:
+    """Return application health status."""
+    
+    if vessels.is_empty:
+         return {"status": "degraded", "reason": "vessel registry empty"}
+
+    return {"status": "ok", "vessels_loaded": str(len(vessels))}
 
 
 @router.get("/version")

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import re
-from typing import Protocol
+from typing import Protocol, Pattern
 
 from .models import ExtractedFields
 
@@ -29,7 +29,7 @@ class RuleBasedAIExtractor:
     """Deterministic extractor based on regular expressions."""
 
     # Improved regex to handle optional labels and more variations
-    _policy_number_pattern = re.compile(
+    _policy_number_pattern: Pattern[str] = re.compile(
         r"(?:policy\s*number|policy\s*id|contract\s*no)[:\-]?\s*(?P<value>[\w\-\./]+)", 
         re.IGNORECASE
     )
