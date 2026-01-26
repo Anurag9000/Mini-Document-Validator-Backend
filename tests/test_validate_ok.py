@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator, Iterator
+from typing import Any
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -18,14 +21,16 @@ class _MockExtractor:
 
 
 @pytest.fixture(autouse=True)
-def restore_overrides():
+def restore_overrides() -> Iterator[None]:
+    """Restore app dependency overrides after each test."""
     original = app.dependency_overrides.copy()
     yield
     app.dependency_overrides = original
 
 
 @pytest_asyncio.fixture
-async def client() -> AsyncClient:
+async def client() -> AsyncIterator[AsyncClient]:
+    """Provide an async HTTP client for testing."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as async_client:
         yield async_client
 

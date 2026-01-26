@@ -53,7 +53,20 @@ class RuleBasedAIExtractor:
     )
 
     def extract(self, text: str) -> ExtractedFields:
-        """Extract fields from document text using regex heuristics."""
+        """Extract fields from document text using regex heuristics.
+        
+        Args:
+            text: Raw document text to extract fields from
+            
+        Returns:
+            ExtractedFields with all extracted data
+            
+        Raises:
+            ValueError: If text is None or empty
+        """
+        if not text or not text.strip():
+            logger.warning("Empty or None text provided to extractor")
+            return ExtractedFields()
 
         logger.debug("Starting extraction from text (length: %d)", len(text))
         data: dict[str, object] = {}

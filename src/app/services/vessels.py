@@ -41,11 +41,23 @@ class VesselRegistry:
 
 
 def _default_data_path() -> Path:
+    """Return the default path to the vessel data file.
+    
+    Resolves to src/app/data/valid_vessels.json relative to this module.
+    """
     # src/app/services/vessels.py -> src/app/data/valid_vessels.json
     return Path(__file__).resolve().parent.parent / "data" / "valid_vessels.json"
 
 
 def _load_vessel_names(path: Path) -> set[str]:
+    """Load vessel names from a JSON file.
+    
+    Args:
+        path: Path to the JSON file containing vessel names
+        
+    Returns:
+        Set of vessel name strings, empty set on error
+    """
     logger.info("Loading vessel names from %s", path)
     if not path.exists():
         logger.error("Vessel data file not found: %s", path)
@@ -54,19 +66,27 @@ def _load_vessel_names(path: Path) -> set[str]:
     try:
         with path.open("r", encoding="utf-8") as fp:
             items = json.load(fp)
-        if not isinstance(items, list):
-            logger.error("Vessel data file must contain a list: %s", path)
-            return set()
-        return {str(item).strip() for item in items if str(item).strip()}
+    except json.JSONDecodeError as e:
+        logger.error("Vessel data file contains invalid JSON at %s: %s", path, e)
+        return set()
     except Exception as e:
         logger.exception("Failed to load vessel names from %s: %s", path, e)
         return set()
+    
+    if not isinstance(items, list):
+        logger.error("Vessel data file must contain a list: %s", path)
+        return set()
+    return {str(item).strip() for item in items if str(item).strip()}
 
 
 @lru_cache(maxsize=1)
 def get_vessel_registry(path: Path | None = None) -> VesselRegistry:
-    """Load the vessel registry from disk with caching."""
-
+    """Load the vessel registry from disk with caching.
+    
+    Thread-safety: This function uses @lru_cache which is thread-safe for reads.
+    The VesselRegistry instance is immutable after creation, making it safe
+    for concurrent access across multiple requests.
+    """
     data_path = path or _default_data_path()
     vessels = _load_vessel_names(data_path)
     if not vessels:

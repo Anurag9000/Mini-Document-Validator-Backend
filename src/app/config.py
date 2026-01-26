@@ -23,8 +23,11 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Return cached application settings instance."""
-
+    """Return cached application settings instance.
+    
+    Thread-safety: This function uses @lru_cache which is thread-safe for reads.
+    Settings are immutable after creation, making them safe for concurrent access.
+    """
     return Settings()
 
 

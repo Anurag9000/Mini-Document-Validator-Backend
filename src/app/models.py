@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -34,13 +34,18 @@ class ExtractedFields(BaseModel):
         description="The date when the policy coverage expires (ISO 8601 format)."
     )
     insured_value: Optional[float] = Field(
-        default=None, description="Insured value in monetary units"
+        default=None, 
+        description="Insured value in monetary units (must be positive; negative values are rejected)"
     )
 
     @field_validator("policy_start_date", "policy_end_date", mode="before")
     @classmethod
-    def parse_date(cls, value: Optional[str | date]) -> Optional[date]:
-        """Convert ISO date strings to :class:`datetime.date`."""
+    def parse_date(cls, value: Union[str, date, None]) -> Optional[date]:
+        """Convert ISO date strings to :class:`datetime.date`.
+        
+        Accepts ISO 8601 format (YYYY-MM-DD). Returns None for invalid formats,
+        empty strings, or None values. Strips whitespace and quotes.
+        """
 
         if value in (None, ""):
             return None
@@ -58,7 +63,12 @@ class ExtractedFields(BaseModel):
 
     @field_validator("insured_value", mode="before")
     @classmethod
-    def parse_insured_value(cls, value: Optional[float | str]) -> Optional[float]:
+    def parse_insured_value(cls, value: Union[float, str, None]) -> Optional[float]:
+        """Parse insured value from string or numeric input.
+        
+        Handles currency symbols, thousand separators (commas), and various formats.
+        Rejects negative values. Returns None for invalid or missing values.
+        """
         if value in (None, ""):
             return None
         if isinstance(value, (int, float)):

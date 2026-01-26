@@ -39,8 +39,14 @@ async def lifespan(_: FastAPI):
     
     logger.info("Starting up Genoshi Backend Validator v%s", settings.version)
     try:
-        get_vessel_registry()
-        logger.info("Vessel registry warmed up")
+        registry = get_vessel_registry()
+        if registry.is_empty:
+            logger.warning(
+                "⚠️  Vessel registry is EMPTY - all vessel validations will fail! "
+                "Check that src/app/data/valid_vessels.json exists and contains vessel names."
+            )
+        else:
+            logger.info("Vessel registry warmed up with %d vessels", len(registry))
     except Exception as e:
         logger.error("Failed to warm up vessel registry: %s", e)
     

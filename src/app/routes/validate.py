@@ -39,7 +39,7 @@ async def validate_document(
     try:
         extracted: ExtractedFields = extractor.extract(payload.text)
     except (ValueError, KeyError, AttributeError) as e:
-        logger.exception("AI extraction failed: %s", e)
+        logger.exception("AI extraction failed with error: %s", str(e))
         # Fallback to empty fields on extraction errors
         extracted = ExtractedFields()
 
