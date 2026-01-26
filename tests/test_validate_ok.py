@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 from app.main import app
+from app.ai_extractor import get_default_extractor
 from app.models import ExtractedFields
-from app.routes.validate import get_extractor_dependency
 
 
 class _MockExtractor:
@@ -26,7 +26,7 @@ def restore_overrides():
 
 @pytest_asyncio.fixture
 async def client() -> AsyncClient:
-    async with AsyncClient(app=app, base_url="http://test") as async_client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as async_client:
         yield async_client
 
 
@@ -39,7 +39,7 @@ async def test_validate_happy_path(client: AsyncClient):
         policy_end_date="2024-06-30",
         insured_value="1000000",
     )
-    app.dependency_overrides[get_extractor_dependency] = lambda: _MockExtractor(fields)
+    app.dependency_overrides[get_default_extractor] = lambda: _MockExtractor(fields)
 
     response = await client.post("/validate", json={"text": "ignored"})
     payload = response.json()

@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
 
 from app.main import app
 
 
 @pytest_asyncio.fixture
 async def client() -> AsyncClient:
-    async with AsyncClient(app=app, base_url="http://test") as async_client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as async_client:
         yield async_client
 
 

@@ -68,9 +68,16 @@ class ExtractedFields(BaseModel):
         # We handle cases like "$1,234.56" -> "1234.56"
         clean_value = "".join(c for c in str(value) if c.isdigit() or c in ".-")
         
-        # Handle multiple dots if any (take the last one as separator)
+        # Filter out negative values - insured value should always be positive
+        if clean_value.startswith("-"):
+            return None
+        
+        # Handle multiple dots if any (likely thousand separators)
+        # For "1.234.567.89", we want "1234567.89"
         if clean_value.count(".") > 1:
+            # Remove all dots except the last one (decimal separator)
             parts = clean_value.split(".")
+            # Join all parts except last, then add decimal point and last part
             clean_value = "".join(parts[:-1]) + "." + parts[-1]
 
         try:

@@ -26,19 +26,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["validation"])
 
 
-def get_extractor_dependency() -> AIExtractor:
-    return get_default_extractor()
-
-
-def get_vessel_registry_dependency() -> VesselRegistry:
-    return get_vessel_registry()
-
-
 @router.post("/validate", response_model=ValidationResponse)
 async def validate_document(
     payload: ValidationRequest,
-    extractor: AIExtractor = Depends(get_extractor_dependency),
-    vessels: VesselRegistry = Depends(get_vessel_registry_dependency),
+    extractor: AIExtractor = Depends(get_default_extractor),
+    vessels: VesselRegistry = Depends(get_vessel_registry),
 ) -> ValidationResponse:
     """Extract fields from a document and validate them."""
 
@@ -46,11 +38,15 @@ async def validate_document(
     
     try:
         extracted: ExtractedFields = extractor.extract(payload.text)
-    except Exception as e:
+    except (ValueError, KeyError, AttributeError) as e:
         logger.exception("AI extraction failed: %s", e)
-        # Fallback to empty fields or handle appropriately
+        # Fallback to empty fields on extraction errors
         extracted = ExtractedFields()
 
+    # Check if vessel registry is empty and log warning
+    if vessels.is_empty:
+        logger.warning("Vessel registry is empty - all vessel validations will fail")
+    
     checks = ValidationChecks(
         date_order_ok=validate_date_order(
             extracted.policy_start_date, extracted.policy_end_date
@@ -108,4 +104,4 @@ async def validate_document(
     )
 
 
-__all__ = ["router", "get_extractor_dependency", "get_vessel_registry_dependency"]
+__all__ = ["router"]

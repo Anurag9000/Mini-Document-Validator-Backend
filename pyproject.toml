@@ -63,12 +63,14 @@ addopts = "-ra"
 [tool.hatch.build.targets.wheel]
 packages = ["src/app"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/app/data" = "app/data"
+
 [tool.hatch.build.targets.sdist]
 include = [
   "src/app",
   "README.md",
   "LICENSE.txt",
-  "pyproject.toml",
   "pyproject.toml",
   "src/app/data/**",
 ]

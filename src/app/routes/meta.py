@@ -10,11 +10,6 @@ from ..services.vessels import VesselRegistry, get_vessel_registry
 router = APIRouter(tags=["meta"])
 
 
-def get_settings_dependency() -> Settings:
-    return get_settings()
-
-
-
 
 @router.get("/health")
 async def health(
@@ -29,10 +24,10 @@ async def health(
 
 
 @router.get("/version")
-async def version(settings: Settings = Depends(get_settings_dependency)) -> dict[str, str]:
+async def version(settings: Settings = Depends(get_settings)) -> dict[str, str]:
     """Return the application version."""
 
     return {"version": settings.version}
 
 
-__all__ = ["router", "get_settings_dependency"]
+__all__ = ["router"]
