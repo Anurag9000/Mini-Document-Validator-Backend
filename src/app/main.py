@@ -26,6 +26,7 @@ def setup_logging(settings: Settings) -> None:
         level=settings.log_level,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         stream=sys.stdout,
+        force=True,
     )
     logger.info("Logging initialized with level: %s", settings.log_level)
 

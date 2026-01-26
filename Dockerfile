@@ -23,6 +23,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 COPY --from=builder /install /usr/local
+WORKDIR /app
+# Source is already in /usr/local/lib/python3.11/site-packages if installed as package,
+# but for FastAPI 'app.main:app' to work easily, we can keep one source of truth.
 COPY src ./src
 
 EXPOSE 8000

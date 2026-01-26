@@ -46,9 +46,9 @@ class RuleBasedAIExtractor:
         r"(?:policy\s*end|expiry\s*date|to)[:\-]?\s*(?P<value>\d{4}-\d{2}-\d{2})",
         re.IGNORECASE,
     )
-    # Improved currency handling and whitespace
+    # Improved currency handling and whitespace, supports any number of decimals
     _insured_value_pattern = re.compile(
-        r"(?:insured\s*value|sum\s*insured|limit)[:\-]?\s*(?P<currency>[$€£\w]{1,3})?\s*(?P<value>\-?[0-9,]+(?:\.\d{2})?)",
+        r"(?:insured\s*value|sum\s*insured|limit)[:\-]?\s*(?P<currency>[$€£A-Z]{1,3})?\s*(?P<value>\-?[0-9,]+(?:\.\d+)?)\b",
         re.IGNORECASE,
     )
 

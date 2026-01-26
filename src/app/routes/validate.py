@@ -84,7 +84,7 @@ async def validate_document(
         and not checks.date_order_ok
     ):
         errors.append(
-            f"policy_end_date ({extracted.policy_end_date}) must be after "
+            f"policy_end_date ({extracted.policy_end_date}) must be on or after "
             f"policy_start_date ({extracted.policy_start_date})"
         )
 

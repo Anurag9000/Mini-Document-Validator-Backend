@@ -153,3 +153,28 @@ async def test_vessel_name_case_insensitive(client: AsyncClient):
 
     assert payload["validations"]["vessel_allowed"] is True
     assert payload["is_valid"] is True
+
+
+@pytest.mark.asyncio
+async def test_real_extractor_integration(client: AsyncClient):
+    # Test with the actual extractor to verify regex + parsing
+    from app.ai_extractor import RuleBasedAIExtractor
+    app.dependency_overrides[get_extractor_dependency] = RuleBasedAIExtractor
+
+    doc_text = """
+    CONTRACT NO: AXA-777-B
+    SHIP NAME: Oceanic Star
+    EFFECTIVE DATE: 2024-10-01
+    EXPIRY DATE: 2025-10-01
+    LIMIT: $5,000,000.5
+    """
+    response = await client.post("/validate", json={"text": doc_text})
+    payload = response.json()
+
+    assert payload["extracted"]["policy_number"] == "AXA-777-B"
+    assert payload["extracted"]["vessel_name"] == "Oceanic Star"
+    assert payload["extracted"]["policy_start_date"] == "2024-10-01"
+    assert payload["extracted"]["policy_end_date"] == "2025-10-01"
+    # $5,000,000.5 -> 5000000.5
+    assert payload["extracted"]["insured_value"] == 5000000.5
+    assert payload["is_valid"] is True
