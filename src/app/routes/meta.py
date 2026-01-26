@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Union
+
 from fastapi import APIRouter, Depends
 
 from ..config import Settings, get_settings
@@ -14,13 +16,15 @@ router = APIRouter(tags=["meta"])
 @router.get("/health")
 async def health(
     vessels: VesselRegistry = Depends(get_vessel_registry)
-) -> dict[str, str]:
+) -> dict[str, Union[str, int]]:
     """Return application health status."""
     
     if vessels.is_empty:
          return {"status": "degraded", "reason": "vessel registry empty"}
 
-    return {"status": "ok", "vessels_loaded": str(len(vessels))}
+    return {"status": "ok", "vessels_loaded": len(vessels)}
+
+
 
 
 @router.get("/version")

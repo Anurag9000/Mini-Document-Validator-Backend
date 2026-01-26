@@ -183,3 +183,101 @@ async def test_real_extractor_integration(client: AsyncClient) -> None:
     # $5,000,000.5 -> 5000000.5
     assert payload["extracted"]["insured_value"] == 5000000.5
     assert payload["is_valid"] is True
+
+
+@pytest.mark.asyncio
+async def test_negative_insured_value(client: AsyncClient):
+    """Test that negative insured values are rejected."""
+    fields = ExtractedFields(
+        policy_number="POL-001",
+        vessel_name="Sea Breeze",
+        policy_start_date="2024-05-01",
+        policy_end_date="2024-06-01",
+        insured_value="-100000",
+    )
+    app.dependency_overrides[get_default_extractor] = lambda: _MockExtractor(fields)
+
+    response = await client.post("/validate", json={"text": "ignored"})
+    payload = response.json()
+
+    # Negative values should be parsed as None
+    assert payload["extracted"]["insured_value"] is None
+    assert payload["validations"]["insured_value_ok"] is False
+    assert "insured_value is missing or invalid" in payload["errors"]
+
+
+@pytest.mark.asyncio
+async def test_all_fields_missing(client: AsyncClient):
+    """Test validation when all fields are missing."""
+    fields = ExtractedFields()
+    app.dependency_overrides[get_default_extractor] = lambda: _MockExtractor(fields)
+
+    response = await client.post("/validate", json={"text": "ignored"})
+    payload = response.json()
+
+    assert payload["is_valid"] is False
+    assert "policy_number is missing or empty" in payload["errors"]
+    assert "vessel_name is missing or empty" in payload["errors"]
+    assert "policy_start_date is missing or invalid format" in payload["errors"]
+    assert "policy_end_date is missing or invalid format" in payload["errors"]
+    assert "insured_value is missing or invalid" in payload["errors"]
+
+
+@pytest.mark.asyncio
+async def test_extremely_large_insured_value(client: AsyncClient):
+    """Test that extremely large insured values are handled."""
+    # Value larger than 1 quadrillion should be rejected
+    fields = ExtractedFields(
+        policy_number="POL-001",
+        vessel_name="Sea Breeze",
+        policy_start_date="2024-05-01",
+        policy_end_date="2024-06-01",
+        insured_value=str(1e16),  # 10 quadrillion
+    )
+    app.dependency_overrides[get_default_extractor] = lambda: _MockExtractor(fields)
+
+    response = await client.post("/validate", json={"text": "ignored"})
+    payload = response.json()
+
+    # Should be rejected as None due to overflow protection
+    assert payload["extracted"]["insured_value"] is None
+    assert payload["validations"]["insured_value_ok"] is False
+
+
+@pytest.mark.asyncio
+async def test_same_start_and_end_date(client: AsyncClient):
+    """Test that same start and end date is valid."""
+    fields = ExtractedFields(
+        policy_number="POL-001",
+        vessel_name="Sea Breeze",
+        policy_start_date="2024-05-01",
+        policy_end_date="2024-05-01",  # Same as start
+        insured_value="100000",
+    )
+    app.dependency_overrides[get_default_extractor] = lambda: _MockExtractor(fields)
+
+    response = await client.post("/validate", json={"text": "ignored"})
+    payload = response.json()
+
+    assert payload["validations"]["date_order_ok"] is True
+    assert payload["is_valid"] is True
+
+
+@pytest.mark.asyncio
+async def test_whitespace_in_vessel_name(client: AsyncClient):
+    """Test that vessel names with extra whitespace are handled."""
+    fields = ExtractedFields(
+        policy_number="POL-001",
+        vessel_name="  Sea   Breeze  ",  # Extra whitespace
+        policy_start_date="2024-05-01",
+        policy_end_date="2024-06-01",
+        insured_value="100000",
+    )
+    app.dependency_overrides[get_default_extractor] = lambda: _MockExtractor(fields)
+
+    response = await client.post("/validate", json={"text": "ignored"})
+    payload = response.json()
+
+    # Should still match "Sea Breeze" in registry (case-insensitive, whitespace normalized)
+    assert payload["validations"]["vessel_allowed"] is True
+    assert payload["is_valid"] is True

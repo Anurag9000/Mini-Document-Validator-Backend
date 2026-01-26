@@ -36,12 +36,14 @@ async def validate_document(
 
     logger.info("Received validation request (text length: %d)", len(payload.text))
     
+    extraction_failed = False
     try:
         extracted: ExtractedFields = extractor.extract(payload.text)
-    except (ValueError, KeyError, AttributeError) as e:
-        logger.exception("AI extraction failed with error: %s", str(e))
-        # Fallback to empty fields on extraction errors
+    except Exception as e:
+        # Catch any unexpected extraction errors
+        logger.exception("AI extraction failed with unexpected error: %s", str(e))
         extracted = ExtractedFields()
+        extraction_failed = True
 
     # Check if vessel registry is empty and log warning
     if vessels.is_empty:
@@ -57,6 +59,10 @@ async def validate_document(
     )
 
     errors: list[str] = []
+    
+    # Add extraction failure warning if applicable
+    if extraction_failed:
+        errors.append("Field extraction encountered errors - results may be incomplete")
     
     # Missing field errors
     if not validate_policy_number(extracted.policy_number):
@@ -89,7 +95,14 @@ async def validate_document(
     elif extracted.insured_value is None:
         errors.append("insured_value is missing or invalid")
 
-    is_valid = all(checks.model_dump().values())
+    # Determine overall validity based on all checks passing
+    is_valid = (
+        checks.date_order_ok
+        and checks.insured_value_ok
+        and checks.vessel_allowed
+        and checks.policy_number_ok
+        and not extraction_failed
+    )
     
     if is_valid:
         logger.info("Validation successful for policy %s", extracted.policy_number)
@@ -102,6 +115,7 @@ async def validate_document(
         is_valid=is_valid,
         errors=errors,
     )
+
 
 
 __all__ = ["router"]

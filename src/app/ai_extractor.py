@@ -59,13 +59,19 @@ class RuleBasedAIExtractor:
             text: Raw document text to extract fields from
             
         Returns:
-            ExtractedFields with all extracted data
+            ExtractedFields with all extracted data (may be empty if no fields found)
             
-        Raises:
-            ValueError: If text is None or empty
+        Note:
+            Returns empty ExtractedFields for empty/None text rather than raising.
+            This allows graceful handling of edge cases.
         """
         if not text or not text.strip():
             logger.warning("Empty or None text provided to extractor")
+            return ExtractedFields()
+        
+        # Validate text length to prevent processing extremely large inputs
+        if len(text) > 1_000_000:  # 1MB of text
+            logger.error("Text too large for extraction: %d characters", len(text))
             return ExtractedFields()
 
         logger.debug("Starting extraction from text (length: %d)", len(text))
@@ -73,12 +79,18 @@ class RuleBasedAIExtractor:
         
         policy_match = self._policy_number_pattern.search(text)
         if policy_match:
-            data["policy_number"] = policy_match.group("value").strip()
+            # Sanitize policy number - remove extra whitespace
+            policy_num = policy_match.group("value").strip()
+            policy_num = " ".join(policy_num.split())  # Normalize whitespace
+            data["policy_number"] = policy_num
             logger.debug("Found policy number: %s", data["policy_number"])
 
         vessel_match = self._vessel_name_pattern.search(text)
         if vessel_match:
-            data["vessel_name"] = vessel_match.group("value").strip()
+            # Sanitize vessel name - normalize whitespace and remove tabs
+            vessel = vessel_match.group("value").strip()
+            vessel = " ".join(vessel.split())  # Normalize all whitespace to single spaces
+            data["vessel_name"] = vessel
             logger.debug("Found vessel name: %s", data["vessel_name"])
 
         start_match = self._start_date_pattern.search(text)

@@ -8,7 +8,7 @@ Quick Start (Windows)
 - Create a virtual environment and install deps:
   - PowerShell
     - `py -3.11 -m venv .venv`
-    - `.\\.venv\\Scripts\\Activate.ps1`
+    - `.\.venv\Scripts\Activate.ps1`
     - `pip install -U pip`
     - `pip install -e ".[dev]"`
 
@@ -19,11 +19,11 @@ Run Locally
 - Option 2: Uvicorn directly
   - `uvicorn app.main:app --reload --host 127.0.0.1 --port 8000`
 - Option 3: PowerShell helper scripts
-  - `powershell -ExecutionPolicy Bypass -File scripts\\dev.ps1`
+  - `powershell -ExecutionPolicy Bypass -File scripts\dev.ps1`
 
 API Endpoints
 
-- `GET /health` → `{ "status": "ok" }`
+- `GET /health` → `{ "status": "ok", "vessels_loaded": 15 }`
 - `GET /version` → `{ "version": "0.1.0" }` (or APP_VERSION)
 - `POST /validate`
   - Body: `{ "text": "Policy Number: POL-123\nVessel Name: Sea Breeze\nPolicy Start Date: 2024-01-01\nPolicy End Date: 2024-06-30\nInsured Value: 1000000" }`
@@ -32,7 +32,7 @@ API Endpoints
 Run Tests
 
 - Activate venv then run: `pytest -q`
-- Or: `powershell -ExecutionPolicy Bypass -File scripts\\test.ps1`
+- Or: `powershell -ExecutionPolicy Bypass -File scripts\test.ps1`
 
 Docker
 
@@ -46,17 +46,25 @@ Configuration
 - Optional `.env` (see `.env.example`):
   - `APP_ENV=dev`
   - `APP_VERSION=0.1.0`
+  - `APP_LOG_LEVEL=INFO` (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 
 Project Layout
 
 - `src/app` – FastAPI app and modules
-- `data/valid_vessels.json` – Vessel allowlist
+- `src/app/data/valid_vessels.json` – Vessel allowlist
 - `samples/` – Sample documents
 - `tests/` – Pytest suite
 
 CI (GitHub Actions)
 
 - On push, tests run on Python 3.11 (see `.github/workflows/ci.yml`).
+
+Troubleshooting
+
+- **Import errors**: Ensure you've installed with `pip install -e ".[dev]"` and activated the virtual environment
+- **Port already in use**: Change the port with `--port 8001` or set `APP_PORT=8001` environment variable
+- **Vessel registry empty**: Check that `src/app/data/valid_vessels.json` exists and contains valid JSON array
+- **Tests failing**: Run `python scripts/check_env.py` to verify all dependencies are installed
 
 Deploy Options
 

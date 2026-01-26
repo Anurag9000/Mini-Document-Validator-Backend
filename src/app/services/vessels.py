@@ -69,14 +69,48 @@ def _load_vessel_names(path: Path) -> set[str]:
     except json.JSONDecodeError as e:
         logger.error("Vessel data file contains invalid JSON at %s: %s", path, e)
         return set()
+    except (OSError, IOError) as e:
+        logger.error("Failed to read vessel data file %s: %s", path, e)
+        return set()
     except Exception as e:
-        logger.exception("Failed to load vessel names from %s: %s", path, e)
+        logger.exception("Unexpected error loading vessel names from %s: %s", path, e)
         return set()
     
     if not isinstance(items, list):
-        logger.error("Vessel data file must contain a list: %s", path)
+        logger.error("Vessel data file must contain a JSON array, got %s: %s", type(items).__name__, path)
         return set()
-    return {str(item).strip() for item in items if str(item).strip()}
+    
+    # Validate and clean vessel names
+    valid_vessels = set()
+    empty_count = 0
+    duplicate_count = 0
+    
+    for item in items:
+        if not isinstance(item, str):
+            logger.warning("Skipping non-string vessel entry: %s (type: %s)", item, type(item).__name__)
+            continue
+        
+        vessel_name = str(item).strip()
+        if not vessel_name:
+            empty_count += 1
+            continue
+        
+        # Check for duplicates (case-insensitive)
+        if vessel_name.upper() in {v.upper() for v in valid_vessels}:
+            duplicate_count += 1
+            logger.warning("Duplicate vessel name found (case-insensitive): %s", vessel_name)
+            continue
+        
+        valid_vessels.add(vessel_name)
+    
+    if empty_count > 0:
+        logger.warning("Filtered out %d empty vessel names", empty_count)
+    if duplicate_count > 0:
+        logger.warning("Filtered out %d duplicate vessel names", duplicate_count)
+    
+    logger.info("Successfully loaded %d unique vessel names", len(valid_vessels))
+    return valid_vessels
+
 
 
 @lru_cache(maxsize=1)

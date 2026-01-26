@@ -34,3 +34,17 @@ async def test_version_endpoint(client: AsyncClient) -> None:
     payload = response.json()
     assert "version" in payload
     assert isinstance(payload["version"], str)
+
+
+@pytest.mark.asyncio
+async def test_health_endpoint_validates_types(client: AsyncClient) -> None:
+    """Test that health endpoint returns correct types."""
+    response = await client.get("/health")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "ok"
+    assert "vessels_loaded" in data
+    # Verify vessels_loaded is an integer, not a string
+    assert isinstance(data["vessels_loaded"], int)
+    assert data["vessels_loaded"] > 0

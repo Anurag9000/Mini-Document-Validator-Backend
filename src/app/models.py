@@ -67,19 +67,40 @@ class ExtractedFields(BaseModel):
         """Parse insured value from string or numeric input.
         
         Handles currency symbols, thousand separators (commas), and various formats.
-        Rejects negative values. Returns None for invalid or missing values.
+        Rejects negative values and validates reasonable ranges.
+        Returns None for invalid or missing values.
         """
         if value in (None, ""):
             return None
         if isinstance(value, (int, float)):
-            return float(value)
+            # Validate numeric values are in reasonable range
+            float_val = float(value)
+            if float_val <= 0:
+                return None
+            # Prevent overflow - max reasonable insured value
+            if float_val > 1e15:  # 1 quadrillion
+                return None
+            return float_val
+        
+        # Handle string input
+        if not isinstance(value, str):
+            return None
+            
+        # Remove whitespace
+        value = value.strip()
+        if not value:
+            return None
         
         # Remove currency symbols, commas and other non-numeric chars (except . and -)
         # We handle cases like "$1,234.56" -> "1234.56"
         clean_value = "".join(c for c in str(value) if c.isdigit() or c in ".-")
         
         # Filter out negative values - insured value should always be positive
-        if clean_value.startswith("-"):
+        if clean_value.startswith("-") or clean_value.count("-") > 0:
+            return None
+        
+        # Handle empty result after cleaning
+        if not clean_value or clean_value == ".":
             return None
         
         # Handle multiple dots if any (likely thousand separators)
@@ -91,9 +112,14 @@ class ExtractedFields(BaseModel):
             clean_value = "".join(parts[:-1]) + "." + parts[-1]
 
         try:
-            return float(clean_value)
-        except (ValueError, TypeError):
+            parsed_value = float(clean_value)
+            # Validate positive and reasonable range
+            if parsed_value <= 0 or parsed_value > 1e15:
+                return None
+            return parsed_value
+        except (ValueError, TypeError, OverflowError):
             return None
+
 
 
 class ValidationChecks(BaseModel):
