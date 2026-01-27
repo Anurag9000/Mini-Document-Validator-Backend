@@ -144,7 +144,6 @@ class ExtractedFields(BaseModel):
             
         # Try direct conversion first (handles scientific notation like "1e16" correctly)
         try:
-             # Validate numeric values are in reasonable range
             float_val = float(value)
             if float_val <= 0:
                 return None
@@ -154,8 +153,6 @@ class ExtractedFields(BaseModel):
             return float_val
         except ValueError:
             pass  # Continue to cleaning logic
-            
-        # Remove whitespace
             
         # Remove whitespace
         value = value.strip()

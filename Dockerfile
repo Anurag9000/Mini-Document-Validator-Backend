@@ -42,15 +42,8 @@ USER appuser
 
 EXPOSE 8000
 
-# Add healthcheck with curl for better reliability
+# Add healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import sys; import urllib.request; \
-    try: \
-    response = urllib.request.urlopen('http://localhost:8000/health', timeout=5); \
-    data = response.read(); \
-    sys.exit(0 if b'ok' in data or b'degraded' in data else 1); \
-    except Exception as e: \
-    print(f'Health check failed: {e}'); \
-    sys.exit(1);" || exit 1
+    CMD python -c "import sys, urllib.request; response = urllib.request.urlopen('http://localhost:8000/health', timeout=5); data = response.read(); sys.exit(0 if b'ok' in data or b'degraded' in data else 1)" || exit 1
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
