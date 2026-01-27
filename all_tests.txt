@@ -1,0 +1,55 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Finished Projects\Resume\Document_validator_backend
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-1.3.0
+asyncio: mode=auto, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 30 items
+
+tests\test_edge_cases.py F..F...F.....                                   [ 43%]
+tests\test_meta.py ...                                                   [ 53%]
+tests\test_validate_ok.py .                                              [ 56%]
+tests\test_validate_rules.py .F.......FF..                               [100%]
+
+================================== FAILURES ===================================
+_______________________ test_extremely_large_text_input _______________________
+tests\test_edge_cases.py:49: in test_extremely_large_text_input
+    assert response.status_code == 200
+E   assert 422 == 200
+E    +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+____________________ test_policy_duration_exceeds_50_years ____________________
+tests\test_edge_cases.py:110: in test_policy_duration_exceeds_50_years
+    assert payload["is_valid"] is False
+E   assert True is False
+__________________________ test_whitespace_only_text __________________________
+tests\test_edge_cases.py:168: in test_whitespace_only_text
+    assert response.status_code == 422  # Validation error
+E   assert 200 == 422
+E    +  where 200 = <Response [200 OK]>.status_code
+------------------------------ Captured log call ------------------------------
+WARNING  app.ai_extractor:ai_extractor.py:69 Empty or None text provided to extractor
+WARNING  app.routes.validate:validate.py:136 Validation failed with 5 errors
+_________________________ test_invalid_insured_value __________________________
+tests\test_validate_rules.py:73: in test_invalid_insured_value
+    assert "insured_value (0.0) must be greater than zero" in payload["errors"]
+E   AssertionError: assert 'insured_value (0.0) must be greater than zero' in ['insured_value is missing or invalid']
+------------------------------ Captured log call ------------------------------
+WARNING  app.routes.validate:validate.py:136 Validation failed with 1 errors
+___________________________ test_all_fields_missing ___________________________
+tests\test_validate_rules.py:221: in test_all_fields_missing
+    assert "policy_start_date is missing or invalid format" in payload["errors"]
+E   AssertionError: assert 'policy_start_date is missing or invalid format' in ['policy_number is missing or empty', 'vessel_name is missing or empty', 'policy_start_date is missing or invalid format (YYYY-MM-DD)', 'policy_end_date is missing or invalid format (YYYY-MM-DD)', 'insured_value is missing or invalid']
+------------------------------ Captured log call ------------------------------
+WARNING  app.routes.validate:validate.py:136 Validation failed with 5 errors
+_____________________ test_extremely_large_insured_value ______________________
+tests\test_validate_rules.py:243: in test_extremely_large_insured_value
+    assert payload["extracted"]["insured_value"] is None
+E   assert 116.0 is None
+=========================== short test summary info ===========================
+FAILED tests/test_edge_cases.py::test_extremely_large_text_input - assert 422...
+FAILED tests/test_edge_cases.py::test_policy_duration_exceeds_50_years - asse...
+FAILED tests/test_edge_cases.py::test_whitespace_only_text - assert 200 == 422
+FAILED tests/test_validate_rules.py::test_invalid_insured_value - AssertionEr...
+FAILED tests/test_validate_rules.py::test_all_fields_missing - AssertionError...
+FAILED tests/test_validate_rules.py::test_extremely_large_insured_value - ass...
+======================== 6 failed, 24 passed in 1.22s =========================

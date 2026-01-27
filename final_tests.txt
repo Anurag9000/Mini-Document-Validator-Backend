@@ -1,0 +1,67 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.0.2, pluggy-1.6.0 -- D:\Finished Projects\Resume\Document_validator_backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Finished Projects\Resume\Document_validator_backend
+configfile: pyproject.toml
+plugins: anyio-4.12.1, asyncio-1.3.0
+asyncio: mode=auto, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 30 items
+
+tests/test_edge_cases.py::test_extremely_large_text_input FAILED         [  3%]
+tests/test_edge_cases.py::test_extremely_long_policy_number PASSED       [  6%]
+tests/test_edge_cases.py::test_vessel_name_only_special_characters PASSED [ 10%]
+tests/test_edge_cases.py::test_policy_duration_exceeds_50_years PASSED   [ 13%]
+tests/test_edge_cases.py::test_date_outside_reasonable_range PASSED      [ 16%]
+tests/test_edge_cases.py::test_insured_value_at_boundary PASSED          [ 20%]
+tests/test_edge_cases.py::test_empty_request_text PASSED                 [ 23%]
+tests/test_edge_cases.py::test_whitespace_only_text FAILED               [ 26%]
+tests/test_edge_cases.py::test_multiple_spaces_in_vessel_name_normalization PASSED [ 30%]
+tests/test_edge_cases.py::test_multiple_spaces_in_policy_number_normalization PASSED [ 33%]
+tests/test_edge_cases.py::test_health_endpoint_error_handling PASSED     [ 36%]
+tests/test_edge_cases.py::test_version_endpoint_error_handling PASSED    [ 40%]
+tests/test_edge_cases.py::test_validation_endpoint_with_extraction_exception PASSED [ 43%]
+tests/test_meta.py::test_health_endpoint PASSED                          [ 46%]
+tests/test_meta.py::test_version_endpoint PASSED                         [ 50%]
+tests/test_meta.py::test_health_endpoint_validates_types PASSED          [ 53%]
+tests/test_validate_ok.py::test_validate_happy_path PASSED               [ 56%]
+tests/test_validate_rules.py::test_invalid_date_order PASSED             [ 60%]
+tests/test_validate_rules.py::test_invalid_insured_value FAILED          [ 63%]
+tests/test_validate_rules.py::test_invalid_vessel_name PASSED            [ 66%]
+tests/test_validate_rules.py::test_invalid_policy_number PASSED          [ 70%]
+tests/test_validate_rules.py::test_thousand_separator_and_currency PASSED [ 73%]
+tests/test_validate_rules.py::test_malformed_date PASSED                 [ 76%]
+tests/test_validate_rules.py::test_vessel_name_case_insensitive PASSED   [ 80%]
+tests/test_validate_rules.py::test_real_extractor_integration PASSED     [ 83%]
+tests/test_validate_rules.py::test_negative_insured_value PASSED         [ 86%]
+tests/test_validate_rules.py::test_all_fields_missing FAILED             [ 90%]
+tests/test_validate_rules.py::test_extremely_large_insured_value FAILED  [ 93%]
+tests/test_validate_rules.py::test_same_start_and_end_date PASSED        [ 96%]
+tests/test_validate_rules.py::test_whitespace_in_vessel_name PASSED      [100%]
+
+================================== FAILURES ===================================
+E   assert 422 == 200
+     +  where 422 = <Response [422 Unprocessable Entity]>.status_code
+D:\Finished Projects\Resume\Document_validator_backend\tests\test_edge_cases.py:49: assert 422 == 200
+E   assert 200 == 422
+     +  where 200 = <Response [200 OK]>.status_code
+------------------------------ Captured log call ------------------------------
+WARNING  app.ai_extractor:ai_extractor.py:69 Empty or None text provided to extractor
+WARNING  app.routes.validate:validate.py:136 Validation failed with 5 errors
+D:\Finished Projects\Resume\Document_validator_backend\tests\test_edge_cases.py:168: assert 200 == 422
+E   AssertionError: assert 'insured_value (0.0) must be greater than zero' in ['insured_value is missing or invalid']
+------------------------------ Captured log call ------------------------------
+WARNING  app.routes.validate:validate.py:136 Validation failed with 1 errors
+D:\Finished Projects\Resume\Document_validator_backend\tests\test_validate_rules.py:73: AssertionError: assert 'insured_value (0.0) must be greater than zero' in ['insured_value is missing or invalid']
+E   AssertionError: assert 'policy_start_date is missing or invalid format' in ['policy_number is missing or empty', 'vessel_name is missing or empty', 'policy_start_date is missing or invalid format (YYYY-MM-DD)', 'policy_end_date is missing or invalid format (YYYY-MM-DD)', 'insured_value is missing or invalid']
+------------------------------ Captured log call ------------------------------
+WARNING  app.routes.validate:validate.py:136 Validation failed with 5 errors
+D:\Finished Projects\Resume\Document_validator_backend\tests\test_validate_rules.py:221: AssertionError: assert 'policy_start_date is missing or invalid format' in ['policy_number is missing or empty', 'vessel_name is missing or empty', 'policy_start_date is missing or invalid format (YYYY-MM-DD)', 'policy_end_date is missing or invalid format (YYYY-MM-DD)', 'insured_value is missing or invalid']
+E   assert 116.0 is None
+D:\Finished Projects\Resume\Document_validator_backend\tests\test_validate_rules.py:243: assert 116.0 is None
+=========================== short test summary info ===========================
+FAILED tests/test_edge_cases.py::test_extremely_large_text_input - assert 422...
+FAILED tests/test_edge_cases.py::test_whitespace_only_text - assert 200 == 422
+FAILED tests/test_validate_rules.py::test_invalid_insured_value - AssertionEr...
+FAILED tests/test_validate_rules.py::test_all_fields_missing - AssertionError...
+FAILED tests/test_validate_rules.py::test_extremely_large_insured_value - ass...
+======================== 5 failed, 25 passed in 1.08s =========================

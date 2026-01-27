@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 class ValidationRequest(BaseModel):
     """Request body for validation endpoint."""
 
-    text: str = Field(..., min_length=1, max_length=100_000, description="Raw insurance document text")
+    text: str = Field(..., min_length=1, max_length=5_000_000, description="Raw insurance document text")
 
 
 class ExtractedFields(BaseModel):
@@ -25,6 +25,62 @@ class ExtractedFields(BaseModel):
         default=None, 
         description="The name of the vessel covered by the policy."
     )
+    
+    @field_validator("policy_number", mode="before")
+    @classmethod
+    def validate_policy_number(cls, value: Union[str, None]) -> Optional[str]:
+        """Validate and clean policy number.
+        
+        Rejects extremely long policy numbers and normalizes whitespace.
+        Returns None for invalid values.
+        """
+        if value in (None, ""):
+            return None
+        if not isinstance(value, str):
+            return None
+        
+        # Strip and normalize whitespace
+        cleaned = " ".join(str(value).split())
+        
+        # Reject if empty after cleaning
+        if not cleaned:
+            return None
+        
+        # Reject extremely long policy numbers (likely invalid)
+        if len(cleaned) > 100:
+            return None
+        
+        return cleaned
+    
+    @field_validator("vessel_name", mode="before")
+    @classmethod
+    def validate_vessel_name(cls, value: Union[str, None]) -> Optional[str]:
+        """Validate and clean vessel name.
+        
+        Rejects names with only special characters and normalizes whitespace.
+        Returns None for invalid values.
+        """
+        if value in (None, ""):
+            return None
+        if not isinstance(value, str):
+            return None
+        
+        # Strip and normalize whitespace
+        cleaned = " ".join(str(value).split())
+        
+        # Reject if empty after cleaning
+        if not cleaned:
+            return None
+        
+        # Reject if only special characters (no alphanumeric)
+        if not any(c.isalnum() for c in cleaned):
+            return None
+        
+        # Reject extremely long vessel names
+        if len(cleaned) > 200:
+            return None
+        
+        return cleaned
     policy_start_date: Optional[date] = Field(
         default=None, 
         description="The date when the policy coverage becomes effective (ISO 8601 format)."
@@ -85,6 +141,21 @@ class ExtractedFields(BaseModel):
         # Handle string input
         if not isinstance(value, str):
             return None
+            
+        # Try direct conversion first (handles scientific notation like "1e16" correctly)
+        try:
+             # Validate numeric values are in reasonable range
+            float_val = float(value)
+            if float_val <= 0:
+                return None
+            # Prevent overflow - max reasonable insured value
+            if float_val > 1e15:  # 1 quadrillion
+                return None
+            return float_val
+        except ValueError:
+            pass  # Continue to cleaning logic
+            
+        # Remove whitespace
             
         # Remove whitespace
         value = value.strip()

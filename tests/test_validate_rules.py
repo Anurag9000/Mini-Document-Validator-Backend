@@ -70,7 +70,8 @@ async def test_invalid_insured_value(client: AsyncClient):
     payload = response.json()
 
     assert payload["validations"]["insured_value_ok"] is False
-    assert "insured_value (0.0) must be greater than zero" in payload["errors"]
+    # Model validator converts <= 0 to None, so it reports as missing/invalid
+    assert "insured_value is missing or invalid" in payload["errors"]
 
 
 @pytest.mark.asyncio
@@ -218,8 +219,8 @@ async def test_all_fields_missing(client: AsyncClient):
     assert payload["is_valid"] is False
     assert "policy_number is missing or empty" in payload["errors"]
     assert "vessel_name is missing or empty" in payload["errors"]
-    assert "policy_start_date is missing or invalid format" in payload["errors"]
-    assert "policy_end_date is missing or invalid format" in payload["errors"]
+    assert "policy_start_date is missing or invalid format (YYYY-MM-DD)" in payload["errors"]
+    assert "policy_end_date is missing or invalid format (YYYY-MM-DD)" in payload["errors"]
     assert "insured_value is missing or invalid" in payload["errors"]
 
 

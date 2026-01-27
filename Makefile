@@ -44,7 +44,11 @@ help:
 \t@echo \"  install-hooks - Install pre-commit hooks\"
 
 setup:
-\t@if not exist $(VENV) python -m venv $(VENV) || python3 -m venv $(VENV)
+ifeq ($(OS),Windows_NT)
+\t@if not exist $(VENV) python -m venv $(VENV)
+else
+\t@if [ ! -d $(VENV) ]; then python3 -m venv $(VENV); fi
+endif
 \t$(PIP) install --upgrade pip
 \t$(PIP) install -e \".[dev]\"
 \t$(PRECOMMIT) install

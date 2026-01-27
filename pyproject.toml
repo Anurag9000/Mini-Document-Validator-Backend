@@ -67,7 +67,7 @@ ignore_missing_imports = false
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-ra --cov=app --cov-report=term-missing"
+addopts = "-ra"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/app"]

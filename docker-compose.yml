@@ -12,7 +12,7 @@ services:
       - ./src:/app/src
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health').read()" ]
+      test: [ "CMD", "python", "-c", "import sys; import urllib.request; response = urllib.request.urlopen('http://localhost:8000/health', timeout=5); data = response.read(); sys.exit(0 if b'ok' in data or b'degraded' in data else 1)" ]
       interval: 30s
       timeout: 10s
       retries: 3

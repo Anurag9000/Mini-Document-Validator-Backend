@@ -15,19 +15,28 @@ class VesselRegistry:
     """Stores the set of valid vessel names."""
 
     def __init__(self, vessels: Iterable[str]):
-        self._vessels: set[str] = {v.upper().strip() for v in vessels if v.strip()}
+        # Normalize whitespace: strip, convert to upper, and normalize internal spaces
+        self._vessels: set[str] = {
+            " ".join(v.split()).upper() 
+            for v in vessels 
+            if v and v.strip()
+        }
         logger.debug("Vessel registry initialized with %d vessels", len(self._vessels))
 
     def is_allowed(self, name: str | None) -> bool:
-        """Return ``True`` when the vessel name is registered."""
-
+        """Return ``True`` when the vessel name is registered.
+        
+        Vessel name matching is case-insensitive and normalizes whitespace
+        (multiple spaces are treated as single spaces).
+        """
         if name is None:
             return False
-        return name.upper().strip() in self._vessels
+        # Normalize whitespace in input to match how we store vessels
+        normalized_name = " ".join(name.split()).upper()
+        return normalized_name in self._vessels
 
     def all(self) -> set[str]:
         """Return a copy of the known vessel names."""
-
         return set(self._vessels)
 
     def __len__(self) -> int:
@@ -82,6 +91,7 @@ def _load_vessel_names(path: Path) -> set[str]:
     
     # Validate and clean vessel names
     valid_vessels = set()
+    normalized_vessels = set()  # Track normalized names for duplicate detection
     empty_count = 0
     duplicate_count = 0
     
@@ -95,13 +105,17 @@ def _load_vessel_names(path: Path) -> set[str]:
             empty_count += 1
             continue
         
-        # Check for duplicates (case-insensitive)
-        if vessel_name.upper() in {v.upper() for v in valid_vessels}:
+        # Normalize for duplicate detection (case-insensitive, whitespace normalized)
+        normalized = " ".join(vessel_name.split()).upper()
+        
+        # Check for duplicates using normalized form
+        if normalized in normalized_vessels:
             duplicate_count += 1
             logger.warning("Duplicate vessel name found (case-insensitive): %s", vessel_name)
             continue
         
         valid_vessels.add(vessel_name)
+        normalized_vessels.add(normalized)
     
     if empty_count > 0:
         logger.warning("Filtered out %d empty vessel names", empty_count)

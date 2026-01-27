@@ -19,19 +19,26 @@ async def health(
 ) -> dict[str, Union[str, int]]:
     """Return application health status."""
     
-    if vessels.is_empty:
-         return {"status": "degraded", "reason": "vessel registry empty"}
+    try:
+        if vessels.is_empty:
+            return {"status": "degraded", "reason": "vessel registry empty"}
 
-    return {"status": "ok", "vessels_loaded": len(vessels)}
-
+        return {"status": "ok", "vessels_loaded": len(vessels)}
+    except Exception as e:
+        # Return degraded status instead of crashing
+        return {"status": "degraded", "reason": f"health check error: {str(e)}"}
 
 
 
 @router.get("/version")
 async def version(settings: Settings = Depends(get_settings)) -> dict[str, str]:
     """Return the application version."""
-
-    return {"version": settings.version}
+    
+    try:
+        return {"version": settings.version}
+    except Exception as e:
+        # Return error version instead of crashing
+        return {"version": "unknown", "error": str(e)}
 
 
 __all__ = ["router"]
